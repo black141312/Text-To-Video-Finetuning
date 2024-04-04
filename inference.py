@@ -46,7 +46,7 @@ from utils.lora import inject_inferable_lora
 
 def initialize_pipeline(
     model: str,
-    device: str = "cuda",
+    device: str = "cpu",
     xformers: bool = False,
     sdp: bool = False,
     lora_path: str = "",
@@ -63,9 +63,9 @@ def initialize_pipeline(
         pretrained_model_name_or_path=model,
         scheduler=scheduler,
         tokenizer=tokenizer,
-        text_encoder=text_encoder.to(device=device, dtype=torch.half),
-        vae=vae.to(device=device, dtype=torch.half),
-        unet=unet.to(device=device, dtype=torch.half),
+        text_encoder=text_encoder.to(device=device, dtype=torch.float32),
+        vae=vae.to(device=device, dtype=torch.float32),
+        unet=unet.to(device=device, dtype=torch.float32),
     )
     pipe.scheduler = DPMSolverMultistepScheduler.from_config(pipe.scheduler.config)
 
@@ -91,7 +91,7 @@ def prepare_input_latents(
         # initialize with random gaussian noise
         scale = pipe.vae_scale_factor
         shape = (batch_size, pipe.unet.config.in_channels, num_frames, height // scale, width // scale)
-        latents = torch.randn(shape, dtype=torch.half)
+        latents = torch.randn(shape, dtype=torch.float32)
 
     else:
         # encode init_video to latents
@@ -110,7 +110,7 @@ def encode(pipe: TextToVideoSDPipeline, pixels: Tensor, batch_size: int = 8):
     for idx in trange(
         0, pixels.shape[0], batch_size, desc="Encoding to latents...", unit_scale=batch_size, unit="frame"
     ):
-        pixels_batch = pixels[idx : idx + batch_size].to(pipe.device, dtype=torch.half)
+        pixels_batch = pixels[idx : idx + batch_size].to(pipe.device, dtype=torch.float32)
         latents_batch = pipe.vae.encode(pixels_batch).latent_dist.sample()
         latents_batch = latents_batch.mul(pipe.vae.config.scaling_factor).cpu()
         latents.append(latents_batch)
@@ -129,7 +129,7 @@ def decode(pipe: TextToVideoSDPipeline, latents: Tensor, batch_size: int = 8):
     for idx in trange(
         0, latents.shape[0], batch_size, desc="Decoding to pixels...", unit_scale=batch_size, unit="frame"
     ):
-        latents_batch = latents[idx : idx + batch_size].to(pipe.device, dtype=torch.half)
+        latents_batch = latents[idx : idx + batch_size].to(pipe.device, dtype=torch.float32)
         latents_batch = latents_batch.div(pipe.vae.config.scaling_factor)
         pixels_batch = pipe.vae.decode(latents_batch).sample.cpu()
         pixels.append(pixels_batch)
@@ -281,7 +281,7 @@ def inference(
     guidance_scale: float = 15,
     init_video: Optional[str] = None,
     init_weight: float = 0.5,
-    device: str = "cuda",
+    device: str = "cpu",
     xformers: bool = False,
     sdp: bool = False,
     lora_path: str = "",
@@ -292,7 +292,7 @@ def inference(
     if seed is not None:
         torch.manual_seed(seed)
 
-    with torch.autocast(device, dtype=torch.half):
+    with torch.autocast(device, dtype=torch.float32):
         # prepare models
         pipe = initialize_pipeline(model, device, xformers, sdp, lora_path, lora_rank)
 
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--init-video", type=str, default=None, help="Path to video to initialize diffusion from (will be resized to the specified num_frames, height, and width).")
     parser.add_argument("-iw", "--init-weight", type=float, default=0.5, help="Strength of visual effect of init_video on the output (lower values adhere more closely to the text prompt, but have a less recognizable init_video).")
     parser.add_argument("-f", "--fps", type=int, default=12, help="FPS of output video")
-    parser.add_argument("-d", "--device", type=str, default="cuda", help="Device to run inference on (defaults to cuda).")
+    parser.add_argument("-d", "--device", type=str, default="cpu", help="Device to run inference on (defaults to cuda).")
     parser.add_argument("-x", "--xformers", action="store_true", help="Use XFormers attnetion, a memory-efficient attention implementation (requires `pip install xformers`).")
     parser.add_argument("-S", "--sdp", action="store_true", help="Use SDP attention, PyTorch's built-in memory-efficient attention implementation.")
     parser.add_argument("-lP", "--lora_path", type=str, default="", help="Path to Low Rank Adaptation checkpoint file (defaults to empty string, which uses no LoRA).")

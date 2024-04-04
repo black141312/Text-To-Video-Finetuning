@@ -320,6 +320,7 @@ class SingleVideoDataset(Dataset):
     def create_video_chunks(self):
         # Create a list of frames separated by sample frames
         # [(1,2,3), (4,5,6), ...]
+        print("...................."+self.single_video_path)
         vr = decord.VideoReader(self.single_video_path)
         vr_range = range(1, len(vr), self.frame_step)
 
@@ -599,5 +600,5 @@ class CachedDataset(Dataset):
         return len(self.cached_data_list)
 
     def __getitem__(self, index):
-        cached_latent = torch.load(self.cached_data_list[index], map_location='cuda:0')
+        cached_latent = torch.load(self.cached_data_list[index], map_location='cpu:0')
         return cached_latent

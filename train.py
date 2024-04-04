@@ -78,6 +78,7 @@ def get_train_dataset(dataset_types, train_data, tokenizer):
 
 def extend_datasets(datasets, dataset_items, extend=False):
     biggest_data_len = max(x.__len__() for x in datasets)
+    print(dataset_items)
     extended = []
     for dataset in datasets:
         if dataset.__len__() == 0:
@@ -276,7 +277,7 @@ def handle_cache_latents(
     # Cache latents by storing them in VRAM. 
     # Speeds up training and saves memory by not encoding during the train loop.
     if not should_cache: return None
-    vae.to('cuda', dtype=torch.float16)
+    vae.to('cpu', dtype=torch.float16)
     vae.enable_slicing()
     
     cached_latent_dir = (
@@ -292,7 +293,7 @@ def handle_cache_latents(
             save_name = f"cached_{i}"
             full_out_path =  f"{cache_save_dir}/{save_name}.pt"
 
-            pixel_values = batch['pixel_values'].to('cuda', dtype=torch.float16)
+            pixel_values = batch['pixel_values'].to('cpu', dtype=torch.float16)
             batch['pixel_values'] = tensor_to_vae_latent(pixel_values, vae)
             for k, v in batch.items(): batch[k] = v[0]
         
@@ -301,7 +302,6 @@ def handle_cache_latents(
             del batch
 
             # We do this to avoid fragmentation from casting latents between devices.
-            torch.cuda.empty_cache()
     else:
         cache_save_dir = cached_latent_dir
         
@@ -445,7 +445,7 @@ def save_pipe(
     del pipeline
     del unet_out
     del text_encoder_out
-    torch.cuda.empty_cache()
+    torch.cpu.empty_cache()
     gc.collect()
 
 
@@ -944,7 +944,7 @@ def main(
                             export_to_video(video_frames, out_file, train_data.get('fps', 8))
 
                             del pipeline
-                            torch.cuda.empty_cache()
+                            torch.cpu.empty_cache()
 
                     logger.info(f"Saved a new sample to {out_file}")
 

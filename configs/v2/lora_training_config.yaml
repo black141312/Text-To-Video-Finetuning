@@ -103,11 +103,11 @@ train_data:
   # The number of frames to sample. The higher this number, the higher the VRAM (acts similar to batch size).
   n_sample_frames: 8
   
-  # 'single_video'
-  single_video_path: "path/to/single/video.mp4"
+ # 'single_video'
+  single_video_path: "/Users/aditya/Desktop/potat1/sample.mp4"
 
   # The prompt when using a a single video file
-  single_video_prompt: ""
+  single_video_prompt: "A person sitting beside a rock and person in a mud . A person have beutiful eyes and he is drowing and his mouth being pressed by another person hand."
 
   # Fallback prompt if caption cannot be read. Enabled for 'image' and 'folder'.
   fallback_prompt: ''
