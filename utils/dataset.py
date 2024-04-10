@@ -600,5 +600,5 @@ class CachedDataset(Dataset):
         return len(self.cached_data_list)
 
     def __getitem__(self, index):
-        cached_latent = torch.load(self.cached_data_list[index], map_location='cpu:0')
+        cached_latent = torch.load(self.cached_data_list[index], map_location='cuda:0')
         return cached_latent

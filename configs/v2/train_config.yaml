@@ -126,10 +126,10 @@ train_data:
   n_sample_frames: 3
   
   # 'single_video'
-  single_video_path: "/Users/aditya/Desktop/potat1/segment_0.mp4"
+  single_video_path: "./lop/segment_0.mp4"
 
   # The prompt when using a a single video file
-  single_video_prompt: "black and white backdrop of a sad guy with window sill convered with plants. The background is brick wall and the video is titled Side Effects."
+  single_video_prompt: "animated video, a person walking with black hands , he is sad "
 
   # Fallback prompt if caption cannot be read. Enabled for 'image' and 'folder'.
   fallback_prompt: ''
@@ -234,3 +234,9 @@ enable_xformers_memory_efficient_attention: False
 
 # Use scaled dot product attention (Only available with >= Torch 2.0)
 enable_torch_2_attn: True
+
+low_cpu_mem_usage: False
+
+device_map: None
+
+
