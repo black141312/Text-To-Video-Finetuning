@@ -320,6 +320,7 @@ class SingleVideoDataset(Dataset):
     def create_video_chunks(self):
         # Create a list of frames separated by sample frames
         # [(1,2,3), (4,5,6), ...]
+        print("...................."+self.single_video_path)
         vr = decord.VideoReader(self.single_video_path)
         vr_range = range(1, len(vr), self.frame_step)
 

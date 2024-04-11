@@ -145,7 +145,7 @@ You should then be able to resume training from a LoRA model, regardless of whic
 
 ## Finetune.
 ```python
-python train.py --config ./configs/v2/train_config.yaml
+python train.py --config ./configs/v2/my_config.yaml
 ```
 ---
 
@@ -172,14 +172,7 @@ The `inference.py` script can be used to render videos with trained checkpoints.
 
 Example usage: 
 ```
-python inference.py \
-  --model camenduru/potat1 \
-  --prompt "a fast moving fancy sports car" \
-  --num-frames 60 \
-  --window-size 12 \
-  --width 1024 \
-  --height 576 \
-  --sdp
+python inference.py --model camenduru/potat1 --prompt "a cartoon person" --num-frames 10 --window-size 12 --width 380 --height 380 --sdp
 ```
 
 ```
